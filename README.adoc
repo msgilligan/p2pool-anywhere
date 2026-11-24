@@ -1,6 +1,34 @@
 = p2pool-anywhere
 
-Depoy P2Pool (v2) anywhere with Nix.
+Deploy P2Pool (v2) anywhere with Nix.
 
-More info forthcoming.
+NOTE:: This is work-in-progress and will be adding service and VM definitions that can be used to run P2Poolv2 in various configurations.
+
+== Packages
+
+`default`:: same as  `p2poolv2_node`
+`p2poolv2_node`:: `p2poolv2` and `p2poolv2_cli` binaries
+`bitcoind-testnet5`:: `bitcoind` with testnet5 support patch (via https://github.com/bitcoin/bitcoin/pull/35861[PR #35861])
+
+To install P2Poolv2 you can use:
+
+----
+nix profile install github:msgilligan/p2pool-anywhere
+----
+
+To install bitcoind-testnet5:
+
+----
+nix profile install github:msgilligan/p2pool-anywhere#bitcoind-testnet5
+----
+
+== Overlays
+
+`testnet5`:: `nixpkgs` overlay that adds `bitcoind-testnet5` package.
+
+
+== References
+
+* https://docs.p2poolv2.org/nix/[P2Poolv2 Docs - Nix Section]
+
 
