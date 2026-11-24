@@ -3,10 +3,11 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    p2poolv2.url = "github:p2poolv2/p2poolv2/v0.18.0";
   };
 
   outputs =
-    { self, nixpkgs, ... }@inputs:
+    { self, nixpkgs, p2poolv2, ... }@inputs:
     let
       systems = [
         "x86_64-linux"
@@ -53,7 +54,10 @@
       };
 
       packages = forAllSystems (pkgs: {
-        default = pkgs.bitcoind-testnet5;
+        # default package is P2Poolv2
+        default = p2poolv2.packages.${pkgs.stdenv.hostPlatform.system}.p2poolv2_node;
+        inherit (p2poolv2.packages.${pkgs.stdenv.hostPlatform.system}) p2poolv2_node;
+        # bitcoind-testnet5 from the testnet5 overlay
         inherit (pkgs) bitcoind-testnet5;
       });
     };
