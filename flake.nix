@@ -53,10 +53,34 @@
         });
       };
 
-      packages = forAllSystems (pkgs: {
+      packages = forAllSystems (pkgs:
+      let
+        upstream = p2poolv2.packages.${pkgs.stdenv.hostPlatform.system}.p2poolv2_node;
+
+        # Upstream's package only installs the binaries. Wrap upstream (no rebuild needed) to include the dashboard
+        # assets from the p2poolv2 input and set `P2POOL_STATIC_DIR` to point at them.
+        p2poolv2_node = pkgs.symlinkJoin {
+          name = "p2poolv2_node-${upstream.version}";
+          inherit (upstream) version;
+          paths = [ upstream ];
+          nativeBuildInputs = [ pkgs.makeWrapper ];
+          postBuild = ''
+            mkdir -p $out/share/p2poolv2
+            cp -r ${p2poolv2}/p2poolv2_api/static $out/share/p2poolv2/static
+            # --set-default: a user-supplied P2POOL_STATIC_DIR still wins
+            wrapProgram $out/bin/p2poolv2 \
+              --set-default P2POOL_STATIC_DIR $out/share/p2poolv2/static
+          '';
+          passthru.unwrapped = upstream;
+          meta = (upstream.meta or { }) // {
+            mainProgram = "p2poolv2";
+          };
+        };
+      in
+      {
         # default package is P2Poolv2
-        default = p2poolv2.packages.${pkgs.stdenv.hostPlatform.system}.p2poolv2_node;
-        inherit (p2poolv2.packages.${pkgs.stdenv.hostPlatform.system}) p2poolv2_node;
+        default = p2poolv2_node;
+        inherit p2poolv2_node;
         # bitcoind-testnet5 from the testnet5 overlay
         inherit (pkgs) bitcoind-testnet5;
       });
